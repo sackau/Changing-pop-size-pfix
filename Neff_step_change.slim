@@ -1,0 +1,49 @@
+// set up a simple neutral simulation
+initialize() {
+	initializeMutationRate(2* 1e-5);
+	
+	// m1 mutation type: neutral
+	initializeMutationType("m1", 0.5, "f", 0.0);
+	// m2 mutation type: beneficial
+	initializeMutationType("m2", 0.5, "f", 0.0);
+	
+	// g1 genomic element type: uses m1 and m2 for all mutations
+	initializeGenomicElementType("g1",c(m1,m2), c(99,1)); // neutral is 99 percent
+	//initializeGenomicElementType("g1",m1, 1); // neutral is 99 percent
+	
+	// uniform chromosome of length 100 kb with uniform recombination
+	initializeGenomicElement(g1, 0, 100000);
+	initializeRecombinationRate(2* 1e-6);
+}
+
+// create a population of 1000 individuals
+1 early() {
+	sim.addSubpop("p1", 1000);
+}
+
+// burn in till 10N
+10000 late() {
+print(calcHeterozygosity(p1.genomes,sim.mutationsOfType(m1)));
+}
+
+// 1000 generations after the burn in, Change the population size from 1000 to 500, 
+10000: 11000 late() { p1.setSubpopulationSize(500); }
+
+11000 late() {
+cat("after the step change \n");
+print(calcHeterozygosity(p1.genomes,sim.mutationsOfType(m1)));
+}
+
+
+/*
+//2000 generations after the burn in, sample the individuals and do the calculation of alpha
+36000 late() { sim.outputFixedMutations();
+print(calcHeterozygosity(p1.genomes,sim.mutationsOfType(m1))); // if i am calculating like this, i must divide it by appropriate share in this line initializeGenomicElementType("g1",c(m1,m2), c(50,50)); // neutral is 99 percent
+print(calcHeterozygosity(p1.genomes,sim.mutationsOfType(m2)));
+print(calcHeterozygosity(p1.genomes));
+cat("m1 subs " + sum(sim.substitutions.mutationType == m1 & sim.substitutions.fixationTick>=10000));
+cat("m2 subs " + sum(sim.substitutions.mutationType == m2 & sim.substitutions.fixationTick>=10000));
+ }
+ 
+ */
+ 
